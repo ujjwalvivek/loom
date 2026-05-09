@@ -1,5 +1,7 @@
 package engine
 
+import "image"
+
 type Config struct {
 	Width     int
 	Height    int
@@ -7,6 +9,7 @@ type Config struct {
 	TargetFPS int
 	Pixelated bool
 	GC        GCConfig
+	Icon      []image.Image
 }
 
 type GCConfig struct {

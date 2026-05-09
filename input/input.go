@@ -17,8 +17,8 @@ const (
 
 type InputSystem struct {
 	mu           sync.RWMutex
-	keys         [glfw.KeyLast + 1]KeyState
-	mouseButtons [glfw.MouseButtonLast + 1]KeyState
+	keys         [512]KeyState
+	mouseButtons [8]KeyState
 	mouseX       float64
 	mouseY       float64
 	scrollX      float64
@@ -30,8 +30,8 @@ type InputSystem struct {
 }
 
 type InputState struct {
-	keys         [glfw.KeyLast + 1]KeyState
-	mouseButtons [glfw.MouseButtonLast + 1]KeyState
+	keys         [512]KeyState
+	mouseButtons [8]KeyState
 	mouseX       float64
 	mouseY       float64
 	scrollX      float64
@@ -54,10 +54,9 @@ func (is *InputSystem) RegisterCallbacks(window *glfw.Window) {
 		}
 		is.mu.Lock()
 		defer is.mu.Unlock()
-		switch action {
-		case glfw.Press:
+		if action == glfw.Press {
 			is.keys[key] = KeyPressed
-		case glfw.Release:
+		} else if action == glfw.Release {
 			is.keys[key] = KeyReleased
 		}
 	})
@@ -68,10 +67,9 @@ func (is *InputSystem) RegisterCallbacks(window *glfw.Window) {
 		}
 		is.mu.Lock()
 		defer is.mu.Unlock()
-		switch action {
-		case glfw.Press:
+		if action == glfw.Press {
 			is.mouseButtons[button] = KeyPressed
-		case glfw.Release:
+		} else if action == glfw.Release {
 			is.mouseButtons[button] = KeyReleased
 		}
 	})

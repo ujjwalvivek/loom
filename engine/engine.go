@@ -43,6 +43,10 @@ func Run(initialScene Scene, config Config) {
 	}
 	defer window.Destroy()
 	
+	if len(config.Icon) > 0 {
+		window.SetIcon(config.Icon)
+	}
+	
 	window.MakeContextCurrent()
 
 	// Initialize OpenGL bindings
