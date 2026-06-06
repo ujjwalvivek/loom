@@ -65,8 +65,16 @@ jobs:
           cd dist
           for f in loom-mario-term_* loom-mario_*; do
             if [ -f "$f" ]; then
-              base="${f%.exe}"
-              tar czf "${base}.tar.gz" "$f"
+              # Strip .exe for processing
+              exe=""
+              stem="$f"
+              if [[ "$f" == *.exe ]]; then
+                exe=".exe"
+                stem="${f%.exe}"
+              fi
+              bin="${stem%%_*}"
+              mv "$f" "${bin}${exe}"
+              tar czf "${stem}.tar.gz" "${bin}${exe}"
             fi
           done
 
