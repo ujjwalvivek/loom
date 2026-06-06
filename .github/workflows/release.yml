@@ -9,41 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  term:
-    name: Build loom-mario-term
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [linux, darwin, windows]
-        goarch: [amd64, arm64]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: stable
-      - name: Build
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          EXE=""
-          if [ "${{ matrix.goos }}" = "windows" ]; then EXE=".exe"; fi
-          go build -ldflags="-s -w" \
-            -o "dist/loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}${EXE}" \
-            ./examples/mario-term/
-      - name: Package
-        run: |
-          cd dist
-          tar czf "loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" \
-            "loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}"*
-      - uses: actions/upload-artifact@v4
-        with:
-          name: term-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: dist/*.tar.gz
-
-  gui:
-    name: Build loom-mario (${{ matrix.runner }})
+  build:
+    name: Build (${{ matrix.runner }})
     strategy:
       matrix:
         include:
@@ -51,6 +18,11 @@ jobs:
             goos: linux
             goarch: amd64
             deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev gcc-aarch64-linux-gnu
+            cc: aarch64-linux-gnu-gcc
           - runner: macos-latest
             goos: darwin
             goarch: amd64
@@ -69,33 +41,46 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
+
       - name: Install system deps
         run: ${{ matrix.deps }}
-      - name: Build
+
+      - name: Build binaries
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 1
+          CC: ${{ matrix.cc }}
         run: |
           EXE=""
           if [ "${{ matrix.goos }}" = "windows" ]; then EXE=".exe"; fi
+          mkdir -p dist
+          go build -ldflags="-s -w" \
+            -o "dist/loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}${EXE}" \
+            ./examples/mario-term/
           go build -ldflags="-s -w" \
             -o "dist/loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}${EXE}" \
             ./examples/mario/
+
       - name: Package
         shell: bash
         run: |
           cd dist
-          tar czf "loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" \
-            "loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}"*
+          for f in loom-mario-term_* loom-mario_*; do
+            if [ -f "$f" ]; then
+              base="${f%.exe}"
+              tar czf "${base}.tar.gz" "$f"
+            fi
+          done
+
       - uses: actions/upload-artifact@v4
         with:
-          name: gui-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: ${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/*.tar.gz
 
   release:
     name: Publish release
-    needs: [term, gui]
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
