@@ -42,6 +42,7 @@ jobs:
         run: ${{ matrix.deps }}
 
       - name: Build binaries
+        shell: bash
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
