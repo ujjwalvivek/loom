@@ -17,11 +17,11 @@ jobs:
           - runner: ubuntu-latest
             goos: linux
             goarch: amd64
-            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libasound2-dev
+            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libasound2-dev libxxf86vm-dev
           - runner: ubuntu-latest
             goos: linux
             goarch: arm64
-            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libasound2-dev gcc-aarch64-linux-gnu
+            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libasound2-dev libxxf86vm-dev gcc-aarch64-linux-gnu
             cc: aarch64-linux-gnu-gcc
           - runner: macos-latest
             goos: darwin
