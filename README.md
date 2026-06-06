@@ -74,8 +74,43 @@ The architecture is largely complete, but the following features are pending imp
      * audio/mixer.go: Doesn't exist. The volume groups and distance-attenuation panning logic are currently just baked directly into synth.go and audio.go.
      * physics/layers.go: Doesn't exist. The 32-bit collision layer mask checks are just floating inline inside the physics.go integration loop.
 5. **ECS Concurrent Write Safety**:
-   * Archetype storage needs read/write separation when parallel systems execute.
-   * Decide between per-archetype RWMutex vs channel-based write batching before implementing.
+    * Archetype storage needs read/write separation when parallel systems execute.
+    * Decide between per-archetype RWMutex vs channel-based write batching before implementing.
+
+## Install Examples
+
+### Quick install (any platform)
+
+**Unix** (Linux, macOS, WSL):
+
+```sh
+curl -sS https://raw.githubusercontent.com/ujjwalvivek/loom/main/examples/scripts/install.sh | sh
+loom-mario-term
+```
+
+**Windows** (PowerShell):
+
+```powershell
+irm https://raw.githubusercontent.com/ujjwalvivek/loom/main/examples/scripts/install.ps1 | iex
+loom-mario-term
+```
+
+The terminal version runs anywhere and has no dependencies.
+The GUI version (`loom-mario`) requires OpenGL 3.3 and GLFW.
+
+### Direct download
+
+Pre-built binaries for all platforms are available on the
+[GitHub Releases](https://github.com/ujjwalvivek/loom/releases) page,
+with a [download page](https://loom.ujjwalvivek.dev) hosted on Cloudflare Pages.
+
+### Build from source
+
+```sh
+go install github.com/ujjwalvivek/loom/examples/mario-term@latest
+# or:
+go install github.com/ujjwalvivek/loom/examples/mario@latest
+```
 
 ## License
 

@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  term:
+    name: Build loom-mario-term
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          EXE=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXE=".exe"; fi
+          go build -ldflags="-s -w" \
+            -o "dist/loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}${EXE}" \
+            ./examples/mario-term/
+      - name: Package
+        run: |
+          cd dist
+          tar czf "loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" \
+            "loom-mario-term_${{ matrix.goos }}_${{ matrix.goarch }}"*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: term-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*.tar.gz
+
+  gui:
+    name: Build loom-mario (${{ matrix.runner }})
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            deps: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev libglfw3-dev
+          - runner: macos-latest
+            goos: darwin
+            goarch: amd64
+            deps: brew install glfw
+          - runner: macos-latest
+            goos: darwin
+            goarch: arm64
+            deps: brew install glfw
+          - runner: windows-latest
+            goos: windows
+            goarch: amd64
+            deps: choco install mingw
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Install system deps
+        run: ${{ matrix.deps }}
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+        run: |
+          EXE=""
+          if [ "${{ matrix.goos }}" = "windows" ]; then EXE=".exe"; fi
+          go build -ldflags="-s -w" \
+            -o "dist/loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}${EXE}" \
+            ./examples/mario/
+      - name: Package
+        shell: bash
+        run: |
+          cd dist
+          tar czf "loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}.tar.gz" \
+            "loom-mario_${{ matrix.goos }}_${{ matrix.goarch }}"*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gui-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*.tar.gz
+
+  release:
+    name: Publish release
+    needs: [term, gui]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Collect tarballs
+        run: |
+          mkdir -p release-assets
+          find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
+
+      - name: Generate checksums
+        run: |
+          cd release-assets
+          sha256sum *.tar.gz > checksums.txt
+
+      - name: Build asset list
+        id: assets
+        run: |
+          ASSETS=$(ls release-assets/*.tar.gz 2>/dev/null | xargs -n1 basename | sort)
+          TABLE=""
+          while IFS= read -r f; do
+            TABLE="${TABLE}| \`${f}\` | \`${f}\` |"$'\n'
+          done <<< "$ASSETS"
+          echo "table<<EOF" >> $GITHUB_OUTPUT
+          echo "${TABLE}" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: |
+            ## Loom Mario Demo
+
+            **Version:** ${{ github.ref_name }}
+
+            ### Quick install
+
+            **Unix** (Linux, macOS, WSL):
+            ```
+            curl -sS https://raw.githubusercontent.com/ujjwalvivek/loom/main/examples/scripts/install.sh | sh
+            ```
+
+            **Windows** (PowerShell):
+            ```powershell
+            irm https://raw.githubusercontent.com/ujjwalvivek/loom/main/examples/scripts/install.ps1 | iex
+            ```
+
+            ### Artifacts
+
+            | Binary | File |
+            |--------|------|
+            ${{ steps.assets.outputs.table }}
+
+            **Checksums:** `checksums.txt`
+          files: release-assets/*
+          prerelease: ${{ contains(github.ref_name, '-rc') || contains(github.ref_name, '-beta') }}
