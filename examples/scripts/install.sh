@@ -2,7 +2,7 @@
 set -eu
 REPO="ujjwalvivek/loom"
 BINARY="${1:-loom-mario-term}"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 case "$ARCH" in
@@ -36,14 +36,13 @@ curl -fsSL "$URL" -o "/tmp/$ARCHIVE" || {
 }
 echo "Extracting ..."
 tar -xzf "/tmp/$ARCHIVE" -C /tmp
-echo "Installing to $INSTALL_DIR/$BINARY ..."
-if [ -w "$INSTALL_DIR" ]; then
-  mv "/tmp/$BINARY" "$INSTALL_DIR/"
-else
-  sudo mv "/tmp/$BINARY" "$INSTALL_DIR/"
-fi
+mkdir -p "$INSTALL_DIR"
+mv "/tmp/$BINARY" "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/$BINARY"
 rm -f "/tmp/$ARCHIVE"
 echo ""
-echo "$BINARY $TAG installed to $INSTALL_DIR/$BINARY"
-echo "Run '$BINARY' to start."
+echo "$BINARY $TAG installed to:"
+echo "  $INSTALL_DIR/$BINARY"
+echo ""
+echo "Run it now:  $INSTALL_DIR/$BINARY"
+echo "After restart:  $BINARY"

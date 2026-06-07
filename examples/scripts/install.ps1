@@ -1,7 +1,7 @@
 param([string]$Binary = "loom-mario-term")
 $ErrorActionPreference = "Stop"
 $Repo       = "ujjwalvivek/loom"
-$InstallDir = "$env:LOCALAPPDATA\Programs"
+$InstallDir = "$env:USERPROFILE\.local\bin"
 $Arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "x86" }
 $Os = "windows"
 Write-Host "Fetching latest release..." -ForegroundColor Cyan
@@ -30,6 +30,7 @@ else {
   Add-Type -AssemblyName System.IO.Compression.FileSystem
   [System.IO.Compression.TarFile]::ExtractToDirectory($tmp, $InstallDir)
 }
+New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
 $exePath = Join-Path $InstallDir "$Binary.exe"
 $tmpBin  = Join-Path "$env:TEMP" $Binary
 $tmpExe  = Join-Path "$env:TEMP" "$Binary.exe"
@@ -49,5 +50,8 @@ if ($userPath -notlike "*$InstallDir*") {
 }
 Remove-Item -Path $tmp -Force -ErrorAction SilentlyContinue
 Write-Host ""
-Write-Host "$Binary $tag installed to $InstallDir" -ForegroundColor Green
-Write-Host "Run '$Binary' to start." -ForegroundColor Green
+Write-Host "$Binary $tag installed to:" -ForegroundColor Green
+Write-Host "  $exePath" -ForegroundColor Green
+Write-Host "" -ForegroundColor Green
+Write-Host "Run it now:  & \"$exePath\"" -ForegroundColor Green
+Write-Host "After restart:  $Binary" -ForegroundColor Green
