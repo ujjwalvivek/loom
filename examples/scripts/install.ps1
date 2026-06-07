@@ -53,5 +53,5 @@ Write-Host ""
 Write-Host "$Binary $tag installed to:" -ForegroundColor Green
 Write-Host "  $exePath" -ForegroundColor Green
 Write-Host "" -ForegroundColor Green
-Write-Host "Run it now:  & \"$exePath\"" -ForegroundColor Green
+Write-Host "Run it now:  $exePath" -ForegroundColor Green
 Write-Host "After restart:  $Binary" -ForegroundColor Green
