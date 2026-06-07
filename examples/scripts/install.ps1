@@ -32,7 +32,12 @@ else {
 }
 $exePath = Join-Path $InstallDir "$Binary.exe"
 $tmpBin  = Join-Path "$env:TEMP" $Binary
-if (Test-Path $tmpBin) { Move-Item -Path $tmpBin -Destination $exePath -Force }
+$tmpExe  = Join-Path "$env:TEMP" "$Binary.exe"
+if (Test-Path $tmpBin) {
+  Move-Item -Path $tmpBin -Destination $exePath -Force
+} elseif (Test-Path $tmpExe) {
+  Move-Item -Path $tmpExe -Destination $exePath -Force
+}
 if (-not (Test-Path $exePath)) {
   Write-Host "ERROR: Binary not found after extraction." -ForegroundColor Red
   exit 1
