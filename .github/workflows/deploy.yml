@@ -33,7 +33,7 @@ jobs:
       - name: Build docs site
         run: |
           cd examples/docs
-          python -m pysitegen build
+          pysitegen build
 
       - name: Deploy docs site
         uses: cloudflare/wrangler-action@v3
