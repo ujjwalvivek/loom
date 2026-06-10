@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - ".github/workflows/**"
       - "examples/docs/**"
       - "examples/scripts/**"
       - "README.md"
@@ -40,4 +41,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy examples/docs/public --project-name=loom-mario
+          command: pages deploy examples/docs/public --project-name=loom
