@@ -475,7 +475,7 @@ def build():
             ),
             class_="container",
         ),
-        title="Loom Mario - Download",
+        title="Loom Mario - Downloads",
         description="Download the Loom Engine Mario demo.",
         theme=None,
         assets=[

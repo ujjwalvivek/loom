@@ -39,7 +39,7 @@ Audio Thread (goroutine)
 
 To prevent mutex contention on the hot path, the Physics thread pushes deep-copied state snapshots into a lock-free recycle pool. The Renderer consumes the most recent snapshot for drawing, discarding outdated frames if the simulation outpaces the display.
 
-### SubSystems
+### Subsystems
 
 The engine is broken down into small, focused modules under the root directory:
 
@@ -79,7 +79,9 @@ The architecture is largely complete, but the following features are pending imp
 
 ## Install Examples
 
-### Quick install (any platform)
+### Quick Install (any platform)
+
+Pre-built binaries for all platforms are available on the [GitHub Releases](https://github.com/ujjwalvivek/loom/releases) and [Downloads Page](https://loom.ujjwalvivek.dev).
 
 **Unix** (Linux, macOS, WSL):
 
@@ -95,21 +97,26 @@ irm https://raw.githubusercontent.com/ujjwalvivek/loom/main/examples/scripts/ins
 loom-mario-term
 ```
 
-The terminal version runs anywhere and has no dependencies.
-The GUI version (`loom-mario`) requires OpenGL 3.3 and GLFW.
-
-### Direct download
-
-Pre-built binaries for all platforms are available on the
-[GitHub Releases](https://github.com/ujjwalvivek/loom/releases) page,
-with a [download page](https://loom.ujjwalvivek.dev) hosted on Cloudflare Pages.
-
-### Build from source
+**Go Install** (Requires Go 1.25+):
 
 ```sh
 go install github.com/ujjwalvivek/loom/examples/mario-term@latest
 # or:
 go install github.com/ujjwalvivek/loom/examples/mario@latest
+```
+
+**Install From Source**:
+
+```sh
+git clone https://github.com/ujjwalvivek/loom.git && cd loom
+
+# Build terminal version (runs anywhere):
+go build -o loom-mario-term ./examples/mario-term
+./loom-mario-term
+
+# Build GUI version (needs GLFW and OpenGL3.3 deps):
+go build -o loom-mario ./examples/mario
+./loom-mario
 ```
 
 ## License
